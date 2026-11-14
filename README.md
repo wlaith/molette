@@ -162,3 +162,10 @@ npm run build   # dist/ : ESM, CJS, types, styles.css
 ```
 
 `src/styles.css` is the published Molette CSS (tokens + components). The React code adds no styles; change the look there.
+
+To release, bump the version and push the tag. CI runs again, then the release workflow publishes to npm and creates the GitHub release:
+
+```bash
+npm version patch   # or minor / major: commits and tags vX.Y.Z
+git push --follow-tags
+```
