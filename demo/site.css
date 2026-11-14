@@ -1,0 +1,117 @@
+/* The demo page, on one grid system.
+   Columns: 12, with one margin (--m) and one gutter (--gut). Narrow screens fold to 4.
+   Baseline: 7px. Every line-height and vertical space is a multiple of it.
+   Type: four sizes, one per level of the hierarchy.
+     wordmark 42/42   the name
+     voice    28/35   what we say: the intro and each section's statement, always in columns 7 to 12
+     body     17/28   supporting text
+     meta     13/21   captions: index, title, note, nav
+   The page reads Molette's --mo- tokens, so it re-skins with the boards. */
+
+/* The page is the board's ground, so cells read as cells everywhere, as they do in a board. */
+html { background: var(--mo-ground); color-scheme: light; scroll-behavior: smooth; }
+html[data-theme="dark"] { color-scheme: dark; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--mo-ground); color: var(--mo-ink);
+  font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif; font-size: 17px; line-height: 28px;
+  -webkit-font-smoothing: antialiased;
+}
+.site { --stage: color-mix(in oklab, var(--mo-ground), var(--mo-ink) 4%); --b: 7px; --m: 21px; --gut: 21px; overflow-x: clip; }
+.site ::selection { background: var(--mo-select); color: var(--mo-on-select); }
+.site a { color: inherit; text-decoration: none; }
+.site h2, .site h3, .site p { margin: 0; }
+
+/* ---------- The grid ---------- */
+.g { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gut); padding: 0 var(--m); }
+.c-voice, .intro > span, .sec__lead > h2, .split__b { grid-column: 7 / 13; }
+
+/* ---------- Type levels ---------- */
+.wordmark { font-size: 42px; line-height: 42px; font-weight: 500; letter-spacing: -.035em; }
+.intro, .sec__lead h2, .split__b h2 { font-size: 28px; line-height: 35px; font-weight: 400; letter-spacing: -.018em; text-wrap: pretty; }
+.body { font-size: 17px; line-height: 28px; color: var(--mo-ink-2); max-width: 34em; }
+.nav, .meta, .top__mode, .spec__name, .spec__what, .foot { font-size: 13px; line-height: 21px; }
+
+/* ---------- Top: name, sections, mode ---------- */
+.top { padding-top: 21px; align-items: start; }
+.wordmark { grid-column: 1 / 7; }
+.nav { grid-column: 7 / 11; color: var(--mo-ink-2); }
+.nav a:hover { color: var(--mo-ink); }
+.top__mode { grid-column: 11 / 13; justify-self: end; appearance: none; border: 0; background: none; padding: 0; color: var(--mo-ink);
+  font: inherit; font-size: 13px; line-height: 21px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.site .intro { margin-top: 42px; }
+.hero > .meta { margin-top: 56px; }
+
+/* ---------- Meta row: section name in column 1, what to do there in the voice column ---------- */
+.meta { margin-top: 84px; padding-bottom: 7px; align-items: baseline; }
+.meta__title { grid-column: 1 / 7; font-weight: 500; }
+.meta__note { grid-column: 7 / 13; color: var(--mo-ink-2); }
+
+/* ---------- Hero frame: the sketch, edge to edge between the margins ---------- */
+.frame { position: relative; margin: 8px var(--m) 0; height: clamp(320px, calc(100svh - 420px), 42vw); background: #000; overflow: hidden; border-radius: calc(var(--mo-round) * 89px); }
+.hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: pan-y; }
+/* The board over the sketch sits on the same margins, one Molette gap above it. */
+.strip { padding: 0 var(--m); }
+
+/* ---------- Sections ---------- */
+.sec { padding-top: 84px; }
+.sec .meta { margin-top: 0; border-top: 1px solid var(--mo-line); padding-top: 7px; }
+.sec__lead { margin-top: 42px; }
+.split { margin-top: 42px; row-gap: 42px; align-items: start; }
+.split__a { grid-column: 1 / 7; min-width: 0; }
+.split__b > * + * { margin-top: 35px; }
+
+/* ---------- Component specimens: three per row, four columns each ---------- */
+.specs { margin-top: 84px; row-gap: 42px; }
+.spec { grid-column: span 4; min-width: 0; }
+.spec__stage { aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 21px; background: var(--stage); border-radius: calc(var(--mo-round) * 89px); }
+.spec__board { width: 100%; max-width: 380px; }
+.spec__name { margin-top: 7px; font-weight: 500; }
+.spec__what { color: var(--mo-ink-2); }
+
+/* ---------- Install ---------- */
+.install { display: flex; gap: 5px; max-width: 100%; }
+.install__cmd {
+  flex: 1; display: flex; align-items: center; height: 55px; padding: 0 21px; min-width: 0;
+  background: var(--mo-cell); border-radius: calc(var(--mo-round) * 55px);
+  font-family: "IBM Plex Mono", var(--mo-font-mono); font-size: 15px; white-space: nowrap; overflow-x: auto;
+}
+.code {
+  padding: 21px; background: var(--mo-cell); border-radius: calc(var(--mo-round) * 55px);
+  font-family: "IBM Plex Mono", var(--mo-font-mono); font-size: 13px; line-height: 21px; color: var(--mo-ink); overflow-x: auto;
+}
+.t-tag { color: var(--mo-ink); }
+.t-attr { color: var(--mo-ink-2); }
+.t-str, .t-num { color: var(--mo-accent-text); }
+.t-com { color: var(--mo-mark-off); }
+
+/* ---------- Footer ---------- */
+.foot { margin-top: 126px; padding-top: 7px; padding-bottom: 21px; }
+.foot__a { grid-column: 1 / 7; color: var(--mo-ink-2); }
+.foot__b { grid-column: 12 / 13; justify-self: end; }
+
+/* ---------- Medium: specimens two per row ---------- */
+@media (max-width: 1100px) {
+  .spec { grid-column: span 6; }
+}
+
+/* ---------- Narrow: the grid folds to 4 columns; the voice takes the full measure ---------- */
+@media (max-width: 800px) {
+  .site { --m: 16px; --gut: 13px; }
+  .g { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wordmark { grid-column: 1 / 4; grid-row: 1; font-size: 35px; line-height: 42px; }
+  .top__mode { grid-column: 4 / 5; grid-row: 1; align-self: center; }
+  .nav { grid-column: 1 / -1; grid-row: 2; margin-top: 7px; }
+  .spec__stage { aspect-ratio: auto; padding: 42px 21px; }
+  .intro, .sec__lead h2, .split__b h2 { font-size: 21px; line-height: 28px; }
+  .intro > span, .sec__lead > h2, .split__a, .split__b, .spec { grid-column: 1 / -1; }
+  .split__b { order: -1; }
+  .meta { margin-top: 56px; }
+  .meta__title, .meta__note { grid-column: 1 / -1; }
+  .frame { height: auto; aspect-ratio: 4 / 5; }
+  .sec { padding-top: 56px; }
+  .specs { margin-top: 42px; }
+  .foot { margin-top: 84px; }
+  .foot__a { grid-column: 1 / 4; }
+  .foot__b { grid-column: 4 / 5; }
+}

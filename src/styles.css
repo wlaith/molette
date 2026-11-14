@@ -1,0 +1,401 @@
+/* Molette styles: tokens (light + dark) and components. */
+:root, [data-theme="light"], [data-theme="auto"]{--mo-ground: #f4f4f4;--mo-cell: #ffffff;--mo-cell-hover: #e8e8e8;--mo-cell-sunk: #f4f4f4;--mo-cell-tint: #e0e0e0;--mo-cell-inverse: #161616;--mo-line: #e0e0e0;--mo-ink: #161616;--mo-ink-2: #525252;--mo-on-inverse: #f4f4f4;--mo-on-inverse-2: #a8a8a8;--mo-mark-off: #8d8d8d;--mo-accent: #ff832b;--mo-on-accent: #161616;--mo-select: #ffd9be;--mo-on-select: #8a3800;--mo-select-edge: #ba4e00;--mo-value: #161616;--mo-active: #198038;--mo-on-active: #ffffff;--mo-focus: #161616;--mo-accent-text: #ba4e00;--mo-accent-soft: #ffd9be;--mo-accent-soft-ink: #8a3800;--mo-ok: #24a148;--mo-ok-text: #198038;--mo-warn: #f1c21b;--mo-error: #da1e28;}
+[data-theme="dark"]{--mo-ground: #161616;--mo-cell: #262626;--mo-cell-hover: #333333;--mo-cell-sunk: #393939;--mo-cell-tint: #393939;--mo-cell-inverse: #f4f4f4;--mo-line: #393939;--mo-ink: #f4f4f4;--mo-ink-2: #c6c6c6;--mo-on-inverse: #161616;--mo-on-inverse-2: #525252;--mo-mark-off: #8d8d8d;--mo-accent: #eb6200;--mo-on-accent: #161616;--mo-select: #5e2900;--mo-on-select: #ffd9be;--mo-select-edge: #ff832b;--mo-value: #f4f4f4;--mo-active: #42be65;--mo-on-active: #161616;--mo-focus: #f4f4f4;--mo-accent-text: #ff832b;--mo-accent-soft: #5e2900;--mo-accent-soft-ink: #ffd9be;--mo-ok: #42be65;--mo-ok-text: #42be65;--mo-warn: #f1c21b;--mo-error: #fa4d56;}
+/* auto: the system decides. */
+@media (prefers-color-scheme: dark) { [data-theme="auto"]{--mo-ground: #161616;--mo-cell: #262626;--mo-cell-hover: #333333;--mo-cell-sunk: #393939;--mo-cell-tint: #393939;--mo-cell-inverse: #f4f4f4;--mo-line: #393939;--mo-ink: #f4f4f4;--mo-ink-2: #c6c6c6;--mo-on-inverse: #161616;--mo-on-inverse-2: #525252;--mo-mark-off: #8d8d8d;--mo-accent: #eb6200;--mo-on-accent: #161616;--mo-select: #5e2900;--mo-on-select: #ffd9be;--mo-select-edge: #ff832b;--mo-value: #f4f4f4;--mo-active: #42be65;--mo-on-active: #161616;--mo-focus: #f4f4f4;--mo-accent-text: #ff832b;--mo-accent-soft: #5e2900;--mo-accent-soft-ink: #ffd9be;--mo-ok: #42be65;--mo-ok-text: #42be65;--mo-warn: #f1c21b;--mo-error: #fa4d56;} }
+:root{--mo-phi-3: 3px;--mo-phi-5: 5px;--mo-phi-8: 8px;--mo-phi-13: 13px;--mo-phi-21: 21px;--mo-phi-34: 34px;--mo-phi-55: 55px;--mo-round: 0;--mo-cell-xs: 34px;--mo-cell-s: 55px;--mo-cell-m: 89px;--mo-cell-l: 144px;--mo-cell-xl: 233px;--mo-gap-ratio: 0.09;--mo-pad-ratio: 0.146;--mo-glyph-ratio: 0.236;--mo-value-ratio: 0.382;--mo-cols-compact: 5;--mo-cols-regular: 8;--mo-cols-wide: 13;--mo-t-press: 70ms;--mo-t-tick: 110ms;--mo-t-travel: 240ms;--mo-t-reflow: 400ms;--mo-t-hold: 600ms;--mo-ease-productive: cubic-bezier(0.2, 0, 0.38, 0.9);--mo-ease-expressive: cubic-bezier(0.4, 0.14, 0.3, 1);--mo-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;}
+
+/* ---------- Theme options (see Theme.tsx). Each is a data attribute on any ancestor, or on a cell. ----------
+   accent: one base colour (--mo-accent-base); every accent token is mixed from it against this scope's cell and ink,
+   so it works in light and dark. Re-mixed under a nested data-theme, whose cell and ink differ. */
+[data-accent], [data-accent] [data-theme] {
+  --mo-accent: var(--mo-accent-base);
+  --mo-accent-text: color-mix(in oklab, var(--mo-accent-base) 72%, var(--mo-ink));
+  --mo-select: color-mix(in oklab, var(--mo-accent-base) 26%, var(--mo-cell));
+  --mo-on-select: color-mix(in oklab, var(--mo-accent-base) 45%, var(--mo-ink));
+  --mo-select-edge: color-mix(in oklab, var(--mo-accent-base) 85%, var(--mo-ink));
+  --mo-accent-soft: var(--mo-select);
+  --mo-accent-soft-ink: var(--mo-on-select);
+  --mo-on-accent: #161616;
+}
+/* Ink on an accent fill: black on light accents, white on dark ones. */
+@supports (color: oklch(from red l c h)) {
+  [data-accent], [data-accent] [data-theme] { --mo-on-accent: oklch(from var(--mo-accent-base) clamp(0, (0.66 - l) * 1000, 1) 0 0); }
+}
+/* marks: value marks (fills, lit ticks, thumbs, switches, pads) in the accent instead of ink. */
+[data-marks="accent"], [data-marks="accent"] [data-theme] { --mo-value: var(--mo-accent); }
+[data-marks="ink"], [data-marks="ink"] [data-theme] { --mo-value: var(--mo-ink); }
+
+/* Molette: everything is a cell. Every size below derives from --u, the cell. */
+
+.mo, .mo *, .mo-cell, .mo-cell * { box-sizing: border-box; }
+/* No font of its own: text inherits the page's font-family. Set one on any ancestor (CSS, or Theme tokens.font-sans). */
+.mo, .mo-cell { -webkit-font-smoothing: antialiased; }
+.mo { color: var(--mo-ink); }
+.mo-stage { background: var(--mo-ground); padding: var(--mo-phi-34); min-height: 100%; }
+.mo :focus, .mo-cell:focus, .mo-cell :focus { outline: none; }
+.mo :focus-visible, .mo-cell:focus-visible, .mo-cell :focus-visible { outline: 2px solid var(--mo-focus); outline-offset: 2px; }
+/* Focus taken by a pointer press (a slider focuses itself so its keys work) shows no ring until a key is pressed. */
+.mo-cell[data-pointer]:focus-visible { outline: none; }
+/* Inside a Grid, keyboard focus on a cell is drawn by one ring that slides from cell to cell (see Grid). */
+.mo-grid[data-ring] > .mo-cell:focus-visible, .mo-grid[data-ring] .mo-compound > .mo-cell:focus-visible { outline: none; }
+.mo-ring { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; box-shadow: 0 0 0 2px var(--mo-focus); opacity: 0; border-radius: calc(var(--u) * var(--mo-round) + 2px);
+  transition: transform var(--mo-t-tick) var(--mo-ease-productive), width var(--mo-t-tick) var(--mo-ease-productive), height var(--mo-t-tick) var(--mo-ease-productive), opacity var(--mo-t-press); }
+.mo-ring[data-on] { opacity: 1; }
+.mo-ring[data-jump] { transition: opacity var(--mo-t-press); }
+
+/* ---------- Scale: one continuous scale. ----------
+   A preset (data-scale on a Grid, a control or any wrapper) sets --cell; a fluid Grid sets --u to whatever its
+   cells measure. Everything inside a cell derives from --u with the golden ratios, so any cell size works, not only
+   the five presets. The label never goes below 12px, the smallest UI text; the value gives back what the label takes, so
+   padding + label + gap + value always fills the cell exactly (m: 13 + 21 + 8 + 34 + 13 = 89).
+   Dense cells (xs, or a fluid grid squeezed under ~44px) hide labels and centre their content.
+   A cell with no data-scale on itself or an ancestor gets m. Hard edges only: --r is 0 at every scale. */
+:where(.mo-cell):not([data-scale] *), [data-scale="m"] { --cell: var(--mo-cell-m); --g: var(--mo-phi-8); --fw: 300; }
+[data-scale="xs"] { --cell: var(--mo-cell-xs); --g: var(--mo-phi-3);  --fw: 400; }
+[data-scale="s"]  { --cell: var(--mo-cell-s);  --g: var(--mo-phi-5);  --fw: 400; }
+[data-scale="l"]  { --cell: var(--mo-cell-l);  --g: var(--mo-phi-13); --fw: 300; }
+[data-scale="xl"] { --cell: var(--mo-cell-xl); --g: var(--mo-phi-21); --fw: 300; }
+/* Derived, declared wherever a scale is set so it resolves against that element's --u. */
+:where(.mo-cell):not([data-scale] *), [data-scale] {
+  --u: var(--cell); --r: 0px;
+  --p: calc(var(--u) * .146);
+  --fl: max(12px, calc(var(--u) * .146));
+  --flh: max(calc(var(--u) * .236), calc(var(--fl) * 1.3));
+  --fv: calc(var(--u) * .618 - var(--flh));
+  --ld: block; --jc: space-between; --ai: stretch; --hit-x: 0px;
+  /* Wide cells (w ≥ 2) and the Toggle switch; the dense rule below changes these. */
+  --wdir: column; --wdir-key: column; --wai: stretch; --sd: inline; --slot-w: .382; --slot-h: .236; --check: none; --lshrink: 1;
+}
+/* Dense: one line of content. A 1×1 cell centres it and hides the label (a key without an icon keeps its label,
+   shortened to fit). A wide cell lays it out in a row, label left and value or icon right, like a button.
+   The label holds 12px, the smallest UI text; the switch drops its state word for a bigger slot with a check,
+   and a Stepper's halves become the whole cell's halves. */
+[data-scale="xs"], .mo-grid[data-dense] {
+  --fv: calc(var(--u) * .382); --ld: none; --jc: center; --ai: center; --hit-x: 999px;
+  --wdir: row; --wdir-key: row-reverse; --wai: center; --sd: none; --slot-w: .618; --slot-h: .382; --check: block; --lshrink: 1000;
+}
+/* Touch: xs targets are a mouse density. On a coarse pointer xs becomes s, unless .mo-keep-xs is set on it or an ancestor. */
+@media (pointer: coarse) {
+  [data-scale="xs"]:not(.mo-keep-xs, .mo-keep-xs *) {
+    --cell: var(--mo-cell-s); --g: var(--mo-phi-5); --fl: max(12px, calc(var(--u) * .146)); --fv: calc(var(--u) * .618 - var(--flh));
+    --ld: block; --jc: space-between; --ai: stretch; --hit-x: 0px;
+    --wdir: column; --wdir-key: column; --wai: stretch; --sd: inline; --slot-w: .382; --slot-h: .236; --check: none; --lshrink: 1;
+  }
+}
+/* Wide cells always show their label: in a row at dense scales, stacked otherwise. */
+.mo-cell[data-wide] { --ld: block; --jc: space-between; --ai: stretch; }
+.mo-key[data-wide] { flex-direction: var(--wdir-key); align-items: var(--wai); }
+.mo-toggle[data-wide]:not(.mo-toggle--pair), .mo-cell[data-wide]:has(> .mo-label + .mo-value), .mo-stepper[data-wide] .mo-stepper__read { flex-direction: var(--wdir); align-items: var(--wai); }
+.mo-stepper__read { gap: calc(var(--p) * .618); }
+
+/* ---------- The grid: optional. One scale per grid. ---------- */
+.mo-grid {
+  position: relative; display: grid; grid-template-columns: repeat(var(--cols, 8), var(--u)); grid-auto-rows: var(--u); gap: var(--g);
+  transition: gap var(--mo-t-reflow) var(--mo-ease-expressive);
+}
+/* Fluid: the grid fills its container; cells stay square, and --u becomes their real size. Put it inside .mo-board. */
+.mo-board { container-type: inline-size; }
+.mo-grid[data-fit="fluid"] { --u: calc((100cqw - (var(--cols, 8) - 1) * var(--g)) / var(--cols, 8)); grid-template-columns: repeat(var(--cols, 8), minmax(0, 1fr)); }
+/* cols="auto": the Grid picks 13, 8 or 5 columns (the --mo-cols tokens) to fit its container. Cells flow in order,
+   x/y are ignored, and a cell wider than the grid is cut to the grid's width. */
+.mo-grid[data-auto] > .mo-cell, .mo-grid[data-auto] > .mo-compound { grid-column: span min(var(--w, 1), var(--cols, 8)); grid-row: span var(--h, 1); }
+
+/* ---------- The cell ---------- */
+.mo-cell {
+  grid-column: span var(--w, 1); grid-row: span var(--h, 1);
+  position: relative; min-width: 0; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: var(--jc); align-items: var(--ai); gap: calc(var(--p) * .618);
+  padding: var(--p); border-radius: calc(var(--u) * var(--mo-round));
+  background: var(--mo-cell); color: var(--mo-ink);
+  transition: background var(--mo-t-tick) var(--mo-ease-productive), color var(--mo-t-tick) var(--mo-ease-productive), transform var(--mo-t-press) var(--mo-ease-productive), opacity var(--mo-t-tick);
+}
+/* Outside a grid, a cell sizes itself from w/h: w cells plus the gaps between them, so it matches a grid cell exactly. */
+.mo-cell:not(.mo-grid > .mo-cell, .mo-compound > .mo-cell) {
+  width: calc(var(--w, 1) * var(--u) + (var(--w, 1) - 1) * var(--g));
+  height: calc(var(--h, 1) * var(--u) + (var(--h, 1) - 1) * var(--g));
+  flex: none;
+}
+.mo-cell[data-x] { grid-column: var(--x) / span var(--w, 1); grid-row: var(--y) / span var(--h, 1); }
+.mo-cell--sunk { background: var(--mo-cell-tint); }
+.mo-cell--inverse { background: var(--mo-cell-inverse); color: var(--mo-on-inverse); }
+.mo-cell--inverse .mo-label, .mo-cell--inverse .mo-unit { color: var(--mo-on-inverse-2); }
+.mo-cell--accent { background: var(--mo-accent); color: var(--mo-on-accent); }
+.mo-cell--accent .mo-label, .mo-cell--accent .mo-unit { color: var(--mo-on-accent); }
+.mo-cell--slot { background: transparent; box-shadow: inset 0 0 0 1px var(--mo-line); }
+.mo-cell--bare { background: transparent; padding: 0; }
+.mo-row { display: flex; justify-content: space-between; align-items: flex-start; gap: calc(var(--p) * .618); min-width: 0; }
+
+/* Operable cells: the whole cell is the control. */
+button.mo-cell { appearance: none; border: 0; margin: 0; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button.mo-cell:hover { background: var(--mo-cell-hover); }
+button.mo-cell--primary { background: var(--mo-cell-inverse); color: var(--mo-on-inverse); }
+button.mo-cell--primary .mo-label { color: var(--mo-on-inverse); }
+button.mo-cell--primary:hover { background: var(--mo-cell-inverse); opacity: .88; }
+button.mo-cell--inverse:hover { background: var(--mo-cell-inverse); opacity: .9; }
+/* Press: the cell is pushed into the board. The surface goes one level deeper and the content drops 1px.
+   Nothing scales, so the grid's gaps never move. Press lands in 70ms, release settles in 110ms. */
+button.mo-cell > * { transition: transform var(--mo-t-tick) var(--mo-ease-productive); }
+button.mo-cell:active:not(:disabled, [aria-disabled="true"]) { background: var(--mo-cell-tint); }
+button.mo-cell:active:not(:disabled, [aria-disabled="true"]) > * { transform: translateY(1px); transition-duration: var(--mo-t-press); }
+button.mo-cell--primary:active:not(:disabled, [aria-disabled="true"]), button.mo-cell--inverse:active:not(:disabled, [aria-disabled="true"]) { background: var(--mo-cell-inverse); opacity: .8; }
+/* One of many (select options): tint + 2px edge. */
+.mo-cell[role="radio"][aria-checked="true"] { background: var(--mo-select); color: var(--mo-on-select); box-shadow: inset 0 0 0 2px var(--mo-select-edge); }
+.mo-cell[role="radio"][aria-checked="true"] .mo-label { color: var(--mo-on-select); }
+/* On/off (latch keys, pads): an indicator, not a fill. */
+/* Latch keys: a full-width bar along the bottom of the key, shown only when on. It keeps its space when hidden, so
+   the label never moves, and it draws in from the left when the key latches. */
+.mo-latch { display: flex; flex-direction: column; justify-content: space-between; align-items: var(--ai); align-self: stretch; flex: 1; gap: calc(var(--p) * .382); min-width: 0; min-height: 0; }
+/* With an icon on top, the label sits right above the bar, so icon, label and bar keep the key's usual top-to-bottom order. */
+.mo-key:has(> .mo-glyph) .mo-latch { justify-content: flex-end; }
+/* The bar keeps the cell's padding on all four sides. The label never gives up height to it; with an icon on top,
+   the icon-to-label gap tightens to the latch's own gap so icon + label + bar fit inside the padding even at s. */
+.mo-latch > .mo-label { flex: none; }
+.mo-key[data-mode="latch"]:has(> .mo-glyph) { gap: calc(var(--p) * .382); }
+.mo-ind { align-self: stretch; height: max(3px, calc(var(--u) * .056)); flex: none; border-radius: 0; background: var(--mo-value); transform: scaleX(0); transform-origin: left center; transition: transform var(--mo-t-travel) var(--mo-ease-productive), background var(--mo-t-tick); }
+.mo-cell[aria-pressed="true"] .mo-ind { transform: scaleX(1); }
+.mo-cell[data-mode="latch"][aria-pressed="true"]:not([data-role="process"]) { box-shadow: inset 0 0 0 2px var(--mo-value); }
+/* A running process: green fill, the label says the state. */
+.mo-cell[data-role="process"][aria-pressed="true"] { background: var(--mo-active); color: var(--mo-on-active); }
+.mo-cell[data-role="process"][aria-pressed="true"] .mo-label { color: var(--mo-on-active); }
+.mo-cell[data-role="process"][aria-pressed="true"] .mo-ind { background: var(--mo-on-active); }
+.mo-cell[data-role="process"][aria-pressed="true"]:active { background: var(--mo-active); opacity: .85; }
+/* Pads: on = value fill (a matrix of on/off, read as a pattern). */
+.mo-pad[aria-pressed="true"] { background: var(--mo-value); box-shadow: none !important; }
+.mo-cell:disabled, .mo-cell[aria-disabled="true"] { opacity: .4; cursor: not-allowed; }
+
+/* ---------- Type inside cells ---------- */
+.mo-label { display: var(--ld); max-width: 100%; font-family: inherit; font-weight: 400; font-size: var(--fl); line-height: var(--flh); letter-spacing: .02em; color: var(--mo-ink-2); white-space: nowrap; overflow: hidden; }
+.mo-value { font-family: inherit; font-weight: var(--fw, 300); font-size: var(--fv); line-height: 1; letter-spacing: -.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Text is never cut off. There is no ellipsis: labels, words and values each have a fallback chain (useLabel,
+   useFit, useValueFit) that ends in something that fits. In a row, the label gives way long before the value. */
+.mo-value { min-width: 0; max-width: 100%; overflow: hidden; }
+.mo-row > .mo-label { flex-shrink: 1000; }
+.mo-stepper__read > .mo-label, .mo-cell[data-wide] > .mo-label { flex-shrink: var(--lshrink, 1); }
+.mo-value[data-fit] .mo-unit { display: none; }
+.mo-value[data-fit="3"] { font-size: calc(var(--fv) * .8); }
+.mo-value[data-fit="4"] { font-size: calc(var(--fv) * .618); }
+/* Rolling digits. The outer span is the window (clip-path keeps the text baseline, unlike overflow); the inner span
+   moves one line, carrying the old character in ::before above it (rolling up) or below it (rolling down). */
+.mo-digit { display: inline-block; clip-path: inset(0 -.1em); }
+.mo-digit > span { display: inline-block; position: relative; }
+.mo-digit > span[data-from]::before { content: attr(data-from); position: absolute; left: 0; right: 0; text-align: center; }
+.mo-digit[data-roll="up"] > span { animation: mo-roll-up var(--mo-t-tick) var(--mo-ease-productive); }
+.mo-digit[data-roll="up"] > span::before { top: -100%; }
+.mo-digit[data-roll="down"] > span { animation: mo-roll-down var(--mo-t-tick) var(--mo-ease-productive); }
+.mo-digit[data-roll="down"] > span::before { top: 100%; }
+@keyframes mo-roll-up { from { transform: translateY(100%); } }
+@keyframes mo-roll-down { from { transform: translateY(-100%); } }
+.mo-unit { font-size: calc(var(--fv) * .382); color: var(--mo-ink-2); margin-left: .25em; letter-spacing: 0; }
+/* A key without a glyph is never blank: dense scales show its label, shortened to fit (useFit). A key whose
+   label can't fit at all shows its icon alone, with the label as its tooltip and accessible name. */
+.mo-key:not(:has(> .mo-glyph)) .mo-label { display: block; }
+.mo-label[hidden] { display: none !important; }
+.mo-glyph { width: calc(var(--u) * .236); height: calc(var(--u) * .236); flex: none; }
+.mo-glyph * { vector-effect: non-scaling-stroke; }
+
+/* ---------- Hold-to-confirm ---------- */
+.mo-hold::before { content: ""; position: absolute; inset: 0; background: var(--mo-error); opacity: .22; transform-origin: left center; transform: scaleX(var(--hold, 0)); }
+.mo-hold > * { position: relative; }
+/* Released early: the fill drains back. Completed: the full fill flashes once, then clears. */
+.mo-hold.is-draining::before { transition: transform var(--mo-t-travel) var(--mo-ease-productive); }
+@keyframes mo-done { from { opacity: .6; } to { opacity: 0; } }
+.mo-hold.is-done::before { animation: mo-done var(--mo-t-travel) var(--mo-ease-productive) forwards; }
+
+/* ---------- Toggle: 1×1 slot, or 2×1 two words ---------- */
+/* The slot: track --slot-w × --slot-h of a cell, thumb inset by a share of the cell (never a 2px sliver).
+   Dense: the state word goes and the slot grows to 0.618 × 0.382, with a check on the thumb when on,
+   so on/off reads by shape as well as colour. */
+.mo-slot {
+  --sw: calc(var(--u) * var(--slot-w)); --sh: calc(var(--u) * var(--slot-h)); --in: max(1.5px, calc(var(--u) * .034));
+  --th: calc(var(--sh) - 2 * var(--in)); --travel: calc(var(--sw) - var(--th) - 2 * var(--in));
+  position: relative; width: var(--sw); height: var(--sh); border-radius: calc(var(--u) * var(--mo-round) * 1.2); background: var(--mo-mark-off); transition: background var(--mo-t-tick) var(--mo-ease-productive); flex: none;
+}
+.mo-slot::after { content: ""; position: absolute; top: var(--in); left: var(--in); width: var(--th); height: var(--th); border-radius: max(0px, calc(var(--u) * var(--mo-round) * 1.2 - var(--in))); background: var(--mo-cell); transition: transform var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-slot::before { content: ""; display: var(--check, none); position: absolute; z-index: 1; left: calc(var(--in) + var(--travel) + var(--th) / 2); top: 50%;
+  width: calc(var(--th) * .5); height: calc(var(--th) * .26); border-left: 1.5px solid var(--mo-value); border-bottom: 1.5px solid var(--mo-value);
+  transform: translate(-50%, -70%) rotate(-45deg); opacity: 0; transition: opacity var(--mo-t-tick); }
+.mo-toggle[aria-checked="true"] .mo-slot { background: var(--mo-value); }
+.mo-toggle[aria-checked="true"] .mo-slot::before { opacity: 1; transition-delay: calc(var(--mo-t-travel) * .5); }
+.mo-toggle .mo-state { display: var(--sd); font-family: inherit; font-weight: 400; font-size: var(--fl); line-height: var(--flh); color: var(--mo-ink); }
+.mo-toggle[aria-checked="true"] .mo-slot::after { transform: translateX(var(--travel)); }
+.mo-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: calc(var(--p) * .382); flex: 1; min-height: 0; }
+.mo-pair > button { appearance: none; border: 0; margin: 0; padding: 0; background: transparent; cursor: pointer; display: grid; place-items: center; min-width: 0; overflow: hidden; white-space: nowrap; border-radius: calc(var(--u) * var(--mo-round) * .6); font-family: inherit; font-weight: 400; font-size: var(--fl); line-height: 1; color: var(--mo-ink-2); transition: background var(--mo-t-tick) var(--mo-ease-productive), color var(--mo-t-tick); }
+.mo-toggle--pair { padding: calc(var(--p) * .382); }
+.mo-pair > button:hover { background: var(--mo-cell-hover); }
+.mo-pair > button:active:not(:disabled):not([aria-checked="true"]) { background: var(--mo-cell-tint); }
+.mo-pair > button:focus-visible { outline-offset: -2px; }
+.mo-pair > button[aria-checked="true"] { background: var(--mo-select); color: var(--mo-on-select); box-shadow: inset 0 0 0 2px var(--mo-select-edge); }
+
+/* ---------- Compounds: several cells that act as one control ---------- */
+.mo-compound { grid-column: span var(--w, 1); grid-row: span var(--h, 1); display: grid; grid-template-columns: repeat(var(--w, 1), minmax(0, 1fr)); grid-template-rows: repeat(var(--h, 1), minmax(0, 1fr)); gap: var(--g); min-width: 0; min-height: 0; }
+.mo-compound[data-x] { grid-column: var(--x) / span var(--w, 1); grid-row: var(--y) / span var(--h, 1); }
+.mo-compound > .mo-cell { grid-column: auto; grid-row: auto; }
+
+/* ---------- Stepper: value and its controls in ONE cell (2×1 and wider) ---------- */
+.mo-stepper { padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--u) * .618); gap: 0; }
+.mo-stepper__read { display: flex; flex-direction: column; justify-content: space-between; padding: var(--p); min-width: 0; }
+.mo-stepper__btns { position: relative; display: grid; grid-template-rows: 1fr 1fr; box-shadow: inset 1px 0 0 var(--mo-line); }
+.mo-cell--sunk .mo-stepper__btns { box-shadow: inset 1px 0 0 var(--mo-mark-off); }
+.mo-cell--sunk .mo-stepper__btns::after { background: var(--mo-mark-off); }
+.mo-stepper__btns::after { content: ""; position: absolute; left: calc(var(--p) * .618); right: calc(var(--p) * .618); top: 50%; height: 1px; background: var(--mo-line); pointer-events: none; }
+.mo-stepper button { appearance: none; border: 0; margin: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; display: grid; place-items: center; font-family: inherit; font-weight: 300; font-size: calc(var(--fv) * .7); line-height: 1; }
+/* Dense: each button's hit area reaches left across the readout (clipped by the cell), so the top half of the
+   whole cell is + and the bottom half is −, instead of two 17px strips. */
+.mo-stepper button { position: relative; }
+.mo-stepper button::before { content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: var(--hit-x, 0px); }
+.mo-stepper button:hover { background: var(--mo-cell-hover); }
+.mo-stepper button span { transition: transform var(--mo-t-press) var(--mo-ease-productive); }
+.mo-stepper button:active:not([aria-disabled="true"]) { background: var(--mo-cell-tint); }
+.mo-stepper button:active:not([aria-disabled="true"]) span { transform: translateY(1px); }
+.mo-stepper button[aria-disabled="true"] { color: var(--mo-mark-off); cursor: not-allowed; background: transparent; }
+.mo-stepper button:focus-visible { outline-offset: -3px; }
+
+/* ---------- Slider: one ruler, a thumb, fill from the origin (min, or zero when bipolar) ---------- */
+/* Touch: the browser keeps the cross-axis pan, so a swipe across a slider still scrolls the page;
+   the component claims only gestures along its own axis. */
+.mo-slider { cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.mo-slider[data-orient="v"] { cursor: ns-resize; touch-action: pan-x; }
+/* Height is u × .236 so label row + gap + ruler + padding fit the cell exactly at every scale
+   (m: 13 + 34 + 8 + 21 + 13 = 89). Parts, each with one form:
+   ticks  thin marks at round values (major = taller), lit between origin and value;
+   track  1px baseline; fill  3px bar from the origin to the value (from min, or from zero when bipolar);
+   ref    small triangle at the origin, only when the origin isn't the min;
+   thumb  3px bar plus a foot block, the only mark with a foot. */
+.mo-ruler { position: relative; height: calc(var(--u) * .236); flex: none; }
+/* Motion: on a discrete change (click, key, reset, wheel notch) the scale and fill travel over 240ms,
+   and each tick lights the moment it reaches the thumb (--d, solved from the same easing in JS), like an LED meter.
+   While dragging or scrubbing (.is-active) everything follows the pointer instantly. */
+.mo-ruler i { position: absolute; bottom: 0; left: var(--at); width: 1.5px; margin-left: -.75px; height: 50%; background: var(--mo-mark-off);
+  transition: background var(--mo-t-press) linear; transition-delay: calc(var(--d, 0) * var(--mo-t-travel)); }
+.mo-ruler i.maj { width: 2px; margin-left: -1px; height: 100%; }
+.mo-ruler i.lit { background: var(--mo-value); }
+.mo-track { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--mo-mark-off); }
+.mo-fill { position: absolute; left: var(--from); right: calc(100% - var(--to)); bottom: 0; height: 3px; background: var(--mo-value);
+  transition: left var(--mo-t-travel) var(--mo-ease-productive), right var(--mo-t-travel) var(--mo-ease-productive), top var(--mo-t-travel) var(--mo-ease-productive), bottom var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-ref { position: absolute; left: var(--at); top: -6px; width: 9px; height: 5px; margin-left: -4.5px; background: var(--mo-ink-2); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.mo-thumb { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 3px; margin-left: -1.5px; background: var(--mo-value); border-radius: 0; pointer-events: none; }
+.mo-thumb::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 13px; height: 6px; margin-left: -6.5px; border-radius: 0; background: var(--mo-value); transform-origin: bottom; }
+.mo-slider.is-active .mo-fill, .mo-slider.is-active .mo-ruler i { transition: none; }
+/* Hover preview: a hollow bar, no foot, where a click would land. The label previews the value ("→ 64 %"). */
+.mo-ghost { position: absolute; top: -3px; bottom: -3px; left: var(--pos); width: 3px; margin-left: -1.5px; box-shadow: inset 0 0 0 1px var(--mo-ink-2); pointer-events: none; }
+.mo-slider[data-orient="v"] .mo-ghost { top: auto; bottom: var(--pos); left: -3px; right: -3px; width: auto; height: 3px; margin: 0 0 -1.5px 0; }
+.mo-cell--inverse .mo-ghost { box-shadow: inset 0 0 0 1px var(--mo-on-inverse-2); }
+
+/* End stop: pushing past min or max. The thumb's foot compresses (the needle, on a Wheel), and the track's end
+   is already under the thumb, so the limit reads as a wall, not a frozen control. Restarted from JS on each new hit. */
+@keyframes mo-stop-foot { from { transform: scaleY(.5); } to { transform: none; } }
+@keyframes mo-stop-foot-v { from { transform: scaleX(.5); } to { transform: none; } }
+.mo-slider.is-stop .mo-thumb::after { animation: mo-stop-foot var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-slider[data-orient="v"] .mo-ruler { height: auto; flex: 1; width: 100%; }
+.mo-slider[data-orient="v"] .mo-ruler i { left: 50%; bottom: var(--at); height: 1.5px; width: 40%; margin: 0 0 -.75px 0; transform: translateX(-50%); }
+.mo-slider[data-orient="v"] .mo-ruler i.maj { height: 2px; width: 70%; margin-bottom: -1px; }
+.mo-slider[data-orient="v"] .mo-track { left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; margin-left: -.5px; }
+.mo-slider[data-orient="v"] .mo-fill { left: 50%; right: auto; bottom: var(--from); top: calc(100% - var(--to)); width: 3px; height: auto; margin-left: -1.5px; }
+.mo-slider[data-orient="v"] .mo-ref { left: 0; top: auto; bottom: var(--at); width: 5px; height: 9px; margin: 0 0 -4.5px 0; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.mo-slider[data-orient="v"] .mo-thumb { top: auto; bottom: 50%; left: -3px; right: -3px; width: auto; height: 3px; margin: 0 0 -1.5px 0; }
+.mo-slider[data-orient="v"] .mo-thumb::after { left: auto; right: -4px; bottom: 50%; width: 6px; height: 13px; margin: 0 0 -6.5px 0; transform-origin: right; }
+.mo-slider[data-orient="v"].is-stop .mo-thumb::after { animation-name: mo-stop-foot-v; }
+.mo-cell--inverse .mo-ruler i, .mo-cell--inverse .mo-track { background: var(--mo-on-inverse-2); }
+.mo-cell--inverse .mo-ruler i.lit, .mo-cell--inverse .mo-fill, .mo-cell--inverse .mo-thumb, .mo-cell--inverse .mo-thumb::after { background: var(--mo-on-inverse); }
+.mo-cell--inverse .mo-ref { background: var(--mo-on-inverse-2); }
+
+/* ---------- Rotary: ONE component in sizes. Track, value arc from the origin, one handle, min/max at 2×2+. ---------- */
+.mo-dial { cursor: ns-resize; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mo-dial[data-small] { padding: calc(var(--p) * .5); justify-content: center; }
+.mo-rot { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; }
+.mo-rot__sq { position: relative; height: 100%; max-width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
+.mo-rot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.mo-rot .trk { fill: none; stroke: var(--mo-mark-off); stroke-width: 3; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.mo-rot .arc { fill: none; stroke: var(--mo-value); stroke-width: 5; stroke-linecap: butt; vector-effect: non-scaling-stroke; }
+.mo-rot .zero { stroke: var(--mo-ink-2); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.mo-rot .knob { fill: var(--mo-value); stroke: var(--mo-cell); stroke-width: 3; vector-effect: non-scaling-stroke; }
+.mo-lim { position: absolute; top: 84%; transform: translateX(-50%); font-family: inherit; font-weight: 400; font-size: calc(var(--fl) * .85); line-height: 1; color: var(--mo-ink-2); font-variant-numeric: tabular-nums; }
+.mo-rot .mo-value { position: relative; }
+.mo-dial[data-small] .mo-value { font-size: var(--fl); font-weight: 400; }
+.mo-dial:not([data-small]) .mo-value { font-size: calc(var(--fv) * .8); }
+.mo-cell--inverse .mo-rot .trk { stroke: var(--mo-on-inverse-2); }
+.mo-cell--inverse .mo-rot .arc { stroke: var(--mo-on-inverse); }
+.mo-cell--inverse .mo-rot .knob { fill: var(--mo-on-inverse); stroke: var(--mo-cell-inverse); }
+.mo-cell--inverse .mo-lim { color: var(--mo-on-inverse-2); }
+.mo-cell--inverse .mo-rot .zero { stroke: var(--mo-on-inverse-2); }
+
+/* ---------- Readout spark ---------- */
+.mo-spark { flex: 1; min-height: 0; display: flex; align-items: flex-end; gap: calc(var(--g) * .382); }
+.mo-spark i { flex: 1; display: block; background: currentColor; opacity: .28; min-height: 2px; transition: height var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-spark i:last-child { background: var(--mo-accent); opacity: 1; }
+.mo-help { font-family: inherit; font-weight: 400; font-size: calc(var(--fl) * .85); line-height: 1.4; color: var(--mo-ink-2); white-space: normal; }
+
+/* ---------- Input ---------- */
+.mo-field { display: flex; align-items: center; height: calc(var(--u) * .382); background: var(--mo-cell-sunk); border-bottom: 1px solid var(--mo-ink-2); }
+.mo-field input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; padding: 0 calc(var(--p) * .618); font-family: inherit; font-weight: 400; font-size: calc(var(--fv) * .5); line-height: 1; color: var(--mo-ink); }
+.mo-field input:focus-visible { outline: 2px solid var(--mo-focus); outline-offset: -2px; }
+
+/* ---------- Status ---------- */
+.mo-note { font-family: inherit; font-weight: 400; font-size: var(--fl); line-height: var(--flh); color: var(--mo-ink-2); white-space: normal; }
+.mo-status-word { font-family: inherit; font-weight: 400; font-size: var(--fl); line-height: var(--flh); color: var(--mo-ink); }
+
+/* ---------- Arrange mode: the board itself is editable ---------- */
+.mo-grid[data-arrange] { background-image: radial-gradient(circle, var(--mo-mark-off) 1.5px, transparent 2px); background-size: calc(var(--u) + var(--g)) calc(var(--u) + var(--g)); background-position: calc(var(--u) + var(--g) / 2) calc(var(--u) + var(--g) / 2); }
+.mo-grid[data-arrange] > [data-x] { cursor: grab; box-shadow: inset 0 0 0 1px var(--mo-line); }
+.mo-grid[data-arrange] > [data-x].is-picked { box-shadow: inset 0 0 0 2px var(--mo-focus); z-index: 2; }
+.mo-grid[data-arrange] > [data-x] > * { pointer-events: none; }
+.mo-handle { position: absolute; right: 0; bottom: 0; width: calc(var(--p) * 1.618); height: calc(var(--p) * 1.618); cursor: nwse-resize; pointer-events: auto !important; background: linear-gradient(135deg, transparent 50%, var(--mo-focus) 50%); border-bottom-right-radius: var(--r); display: none; }
+.mo-grid[data-arrange] .mo-handle { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mo *, .mo *::before, .mo *::after, .mo-cell, .mo-cell *, .mo-cell::before, .mo-cell *::before, .mo-cell *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
+@media (forced-colors: active) {
+  .mo-cell { border: 1px solid CanvasText; }
+}
+
+.mo-row--end { align-items: flex-end; }
+
+/* ==========================================================================
+   Slider, Tape and Wheel share one engine. Two things vary:
+   motion (data-motion): slide = the ruler slides under a centred thumb (Slider, Tape);
+                         turn = the ticks ride a drum turning under a fixed needle (Wheel).
+   look: Slider's (above), or bare ticks: .mo-tape and .mo-wheel.
+   ========================================================================== */
+
+/* ---------- motion: slide. The window is the ruler plus room above and below for the origin mark, faded at
+   both ends. The strip is --zoom ruler lengths long; it shifts so the value (--pv, 0..1) sits at the centre. ---------- */
+.mo-window { position: absolute; inset: -8px 0; pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent); mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent); }
+.mo-strip { position: absolute; top: 8px; bottom: 8px; left: 50%; width: calc(var(--zoom) * 100%);
+  transform: translateX(calc(var(--pv) * -100%)); transition: transform var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-slider[data-motion="slide"].is-active .mo-strip { transition: none; }
+.mo-slider[data-motion="slide"][data-orient="v"] .mo-window { inset: 0 -8px;
+  -webkit-mask-image: linear-gradient(0deg, transparent, #000 24%, #000 76%, transparent); mask-image: linear-gradient(0deg, transparent, #000 24%, #000 76%, transparent); }
+.mo-slider[data-motion="slide"][data-orient="v"] .mo-strip { top: auto; bottom: 50%; left: 8px; right: 8px; width: auto; height: calc(var(--zoom) * 100%);
+  transform: translateY(calc(var(--pv) * 100%)); }
+
+/* ---------- motion: turn (Wheel). Tape's ticks on a gentle curve: a drum four ruler-widths wide, seen edge-on,
+   its top showing in the cell. Each tick is a spoke from the centre (--a degrees round); the drum turns by
+   --turn so the value sits under a thin needle. Label and value keep their usual row above it. ---------- */
+.mo-slider[data-motion="turn"] .mo-label { position: relative; z-index: 1; }
+.mo-slider[data-motion="turn"] .mo-ruler { position: absolute; inset: 0; height: auto;
+  -webkit-mask-image: linear-gradient(90deg, transparent 6%, #000 32%, #000 68%, transparent 94%); mask-image: linear-gradient(90deg, transparent 6%, #000 32%, #000 68%, transparent 94%); }
+.mo-drum { position: absolute; left: 50%; top: 54%; width: 400%; aspect-ratio: 1; border-radius: 50%;
+  transform: translateX(-50%) rotate(var(--turn)); transition: transform var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-slider[data-motion="turn"] .mo-drum > i { position: absolute; left: 50%; top: 0; bottom: auto; width: 1px; height: 50%; margin-left: -.5px; background: none;
+  transform-origin: 50% 100%; transform: rotate(var(--a)); }
+.mo-slider[data-motion="turn"] .mo-drum > i::before { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 9px; background: var(--mo-mark-off);
+  transition: background var(--mo-t-press) linear, opacity var(--mo-t-press) linear; transition-delay: calc(var(--d, 0) * var(--mo-t-travel)); }
+.mo-slider[data-motion="turn"] .mo-drum > i.maj::before { top: 0; height: 15px; }
+.mo-slider[data-motion="turn"] .mo-drum > i.lit::before { background: var(--mo-value); }
+.mo-needle { position: absolute; left: 50%; top: calc(54% - 5px); height: 25px; width: 2px; margin-left: -1px; background: var(--mo-value); transform-origin: top; }
+.mo-slider[data-motion="turn"].is-active .mo-drum, .mo-slider[data-motion="turn"].is-active .mo-drum > i::before { transition: none; }
+.mo-slider[data-motion="turn"].is-stop .mo-needle { animation: mo-stop-foot var(--mo-t-travel) var(--mo-ease-productive); }
+.mo-cell--inverse.mo-slider[data-motion="turn"] .mo-drum > i::before { background: var(--mo-on-inverse-2); }
+.mo-cell--inverse.mo-slider[data-motion="turn"] .mo-drum > i.lit::before, .mo-cell--inverse .mo-needle { background: var(--mo-on-inverse); }
+
+/* ---------- Tape: ticks and one bar. No baseline, fill bar, foot or origin triangle. ---------- */
+.mo-slider.mo-tape :is(.mo-track, .mo-fill, .mo-ref), .mo-slider.mo-tape .mo-thumb::after { display: none; }
+.mo-slider.mo-tape[data-orient="h"] .mo-ruler i { height: 38%; width: 1px; margin-left: -.5px; }
+.mo-slider.mo-tape[data-orient="h"] .mo-ruler i.maj { height: 62%; width: 1px; margin-left: -.5px; }
+.mo-slider.mo-tape[data-orient="h"] .mo-thumb { top: 0; bottom: 0; width: 2px; margin-left: -1px; }
+.mo-slider.mo-tape[data-orient="v"] .mo-ruler i { width: 38%; height: 1px; margin-bottom: -.5px; }
+.mo-slider.mo-tape[data-orient="v"] .mo-ruler i.maj { width: 62%; height: 1px; }
+.mo-slider.mo-tape[data-orient="v"] .mo-thumb { left: 0; right: 0; height: 2px; margin: 0 0 -1px 0; }
