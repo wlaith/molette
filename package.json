@@ -43,7 +43,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run typecheck && npm run lint && npm test && npm run build",
-    "lint": "oxlint src demo test"
+    "lint": "oxlint src demo test",
+    "build:demo": "vite build demo --config demo/vite.config.ts --base ./"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
