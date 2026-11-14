@@ -430,7 +430,11 @@ export const RangeBase = forwardRef<HTMLDivElement, SliderProps & { kind?: Range
       onPointerCancel={chain(onPointerCancel, () => endDrag(true))}
       onPointerLeave={chain(onPointerLeave, () => setHover(null))}
       // Fires after pointercancel too, so a cancelled touch can't leave a drag running.
-      onLostPointerCapture={chain(onLostPointerCapture, () => endDrag(true))}
+      // Only our own loss counts: a touch is implicitly captured by the child it lands on (a tick, the strip), and
+      // moving that capture to the slider fires lostpointercapture on the child, which bubbles up here.
+      onLostPointerCapture={chain(onLostPointerCapture, (e) => {
+        if (e.target === e.currentTarget && e.pointerId === drag.current?.id) endDrag(true);
+      })}
       onKeyDown={chain(onKeyDown, (e) => {
         e.currentTarget.removeAttribute('data-pointer');
         if (disabled) return;
