@@ -1,10 +1,16 @@
 # Molette
 
+[![npm](https://img.shields.io/npm/v/molette)](https://www.npmjs.com/package/molette)
+[![CI](https://github.com/wlaith/molette/actions/workflows/ci.yml/badge.svg)](https://github.com/wlaith/molette/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Controls designed to be shown. Sliders, steppers, toggles and keys for creative coding: square cells on a golden-ratio grid, with hard edges, built to sit around your sketch instead of floating over it.
 
 A *molette* is the ridged thumbwheel you roll to fine-tune something.
 
-![The Molette demo board: keys, toggles, steppers, readouts and ruler sliders on a golden-ratio grid](docs/board.png)
+**[Try the live demo](https://wlaith.github.io/molette/)**
+
+[![The Molette demo: a board of keys, toggles, ruler sliders, steppers and readouts driving a live generative sketch](docs/board.jpg)](https://wlaith.github.io/molette/)
 
 ## Use it
 
@@ -13,18 +19,24 @@ npm install molette
 ```
 
 ```tsx
-import { Grid, Key, Toggle, Stepper, Slider, Tape, Wheel } from 'molette';
+import { useState } from 'react';
+import { Grid, Key, Toggle, Stepper, Slider } from 'molette';
 import 'molette/styles.css';
 
-<Grid scale="m" cols={8}>
-  <Key mode="latch" process label="Play" onLabel="Playing" />
-  <Toggle label="Outline" defaultChecked />
-  <Stepper label="Size" unit="px" min={8} max={400} defaultValue={120} />
-  <Slider label="Tracking" unit="%" min={-100} max={100} defaultValue={0} w={4} onValueChange={setTracking} />
-</Grid>
+export function Controls() {
+  const [tracking, setTracking] = useState(0);
+  return (
+    <Grid scale="m" cols={8}>
+      <Key mode="latch" process label="Play" onLabel="Playing" />
+      <Toggle label="Outline" defaultChecked />
+      <Stepper label="Size" unit="px" min={8} max={400} defaultValue={120} />
+      <Slider label="Tracking" unit="%" min={-100} max={100} w={4} value={tracking} onValueChange={setTracking} />
+    </Grid>
+  );
+}
 ```
 
-Molette is React components today (React 18 or 19). Feed the values into your p5.js, Canvas or WebGL sketch from `onValueChange`.
+Molette is a React library for now (React 18 or 19). Feed the values into your p5.js, Canvas or WebGL sketch from `onValueChange`.
 
 Browsers: Chrome and Edge 111+, Safari 16.2+, Firefox 121+ (all released in 2023). The CSS relies on `:has()`, `color-mix()`, `oklch()` and container queries.
 
@@ -81,6 +93,11 @@ Every component takes `w h` (size in cells), optional `x y` (fixed placement in 
 
 Scale comes from the control's own `scale`, else the nearest ancestor with `data-scale` (a Grid sets one), else `m`.
 
+Any other HTML attribute (`id`, `data-*`, `aria-*`, event handlers) passes through to the element; your handlers run before the built-in ones, and `preventDefault()` skips ours.
+Values work controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`).
+
+Every control shows numbers by the same rules: decimals follow `step` (step `0.01` shows `137.51`), negatives take a true minus (`−6`), and on a range that crosses zero, positives take a `+` (`+12`). Digits are tabular, so they don't jitter while dragging.
+
 ### Responsive boards
 
 The five scales are presets on one continuous scale: padding, label and value sizes all derive from the cell size, so a cell of any size lays out the same way.
@@ -92,26 +109,28 @@ The five scales are presets on one continuous scale: padding, label and value si
 <Grid cols="auto" fluid scale="s">…</Grid>
 ```
 
-- **Text is never cut off.** There is no ellipsis anywhere: every label, word and value has a chain of fallbacks that ends in something that fits.
-  - **Key:** `onLabel` → `label` → `short` → the icon alone, with the label as its tooltip. Without an icon: generated forms, down to one letter ("Settings" → "Set" → "S").
-  - **Pair:** both words step down together: `short`, then generated forms ("Aut" / "Man").
-  - **Stepper, Toggle, Slider, Tape, Wheel, Readout labels:** first word, then first three letters, then hidden (a control's label becomes its tooltip).
-  - **Values:** drop the unit, then large numbers go compact (14400 → "14.4K"), then the value steps down to 0.8 and 0.618 of its size.
-  - The accessible name never changes. Whenever a generated form is used, or a value can't fit even at its smallest, Molette warns in the console during development, naming the label, so you can give it a `short` form or a wider cell before it ships.
+- **Dense cells.** At `xs` (or a fluid grid squeezed under ~44px), a 1×1 cell shows one centred thing: an icon, a short label, a value. A cell 2 or more wide lays out in a row, like a button: label on the left, icon or value on the right. Labels hold 12px. The switch drops its state word for a bigger slot with a check on the thumb when on. A Stepper's top and bottom halves become the + and − targets across the whole cell.
+- **Touch:** on a touch screen (`pointer: coarse`), `xs` becomes `s`, since 34px cells are too small for fingers. Put `className="mo-keep-xs"` on the control or an ancestor to keep `xs`.
+
+### Text is never cut off
+
+There is no ellipsis anywhere: every label, word and value has a chain of fallbacks that ends in something that fits.
+
+- **Key:** `onLabel` → `label` → `short` → the icon alone, with the label as its tooltip. Without an icon: generated forms, down to one letter ("Settings" → "Set" → "S").
+- **Pair:** both words step down together: `short`, then generated forms ("Aut" / "Man").
+- **Stepper, Toggle, Slider, Tape, Wheel, Readout labels:** first word, then first three letters, then hidden (a control's label becomes its tooltip).
+- **Values:** drop the unit, then large numbers go compact (14400 → "14.4K"), then the value steps down to 0.8 and 0.618 of its size.
+
+The accessible name never changes. Whenever a generated form is used, or a value can't fit even at its smallest, Molette warns in the console during development, naming the label, so you can give it a `short` form or a wider cell before it ships.
 
 ```tsx
 <Key label="Save" short="Sv" />
 <Toggle pair={['Auto', 'Manual']} short={['Au', 'Man']} label="Mode" />
 ```
 
-- **Dense cells.** At `xs` (or a fluid grid squeezed under ~44px), a 1×1 cell shows one centred thing: an icon, a short label, a value. A cell 2 or more wide lays out in a row, like a button: label on the left, icon or value on the right. Labels hold 12px. The switch drops its state word for a bigger slot with a check on the thumb when on. A Stepper's top and bottom halves become the + and − targets across the whole cell.
-- **Touch:** on a touch screen (`pointer: coarse`), `xs` becomes `s`, since 34px cells are too small for fingers. Put `className="mo-keep-xs"` on the control or an ancestor to keep `xs`.
-Any other HTML attribute (`id`, `data-*`, `aria-*`, event handlers) passes through to the element; your handlers run before the built-in ones, and `preventDefault()` skips ours.
-Values work controlled (`value` + `onValueChange`) or uncontrolled (`defaultValue`).
+### Slider, Tape and Wheel
 
-Every control shows numbers by the same rules: decimals follow `step` (step `0.01` shows `137.51`), negatives take a true minus (`−6`), and on a range that crosses zero, positives take a `+` (`+12`). Digits are tabular, so they don't jitter while dragging.
-
-Slider, Tape and Wheel share one engine and follow one rule: a press never changes a value, a gesture does, so you can touch the board while a sketch runs.
+The three share one engine and follow one rule: a press never changes a value, a gesture does, so you can touch the board while a sketch runs.
 The scale is longer than the cell and moves under a fixed thumb (Wheel: the scale turns), so you always see the ticks around the value.
 
 - **Drag** anywhere on the control to pull the scale: it moves as far as the pointer moves, so dragging right brings lower values to the thumb.
@@ -122,11 +141,15 @@ The scale is longer than the cell and moves under a fixed thumb (Wheel: the scal
 - **Wheel and trackpad** (only while the slider has focus): a trackpad moves the thumb as far as your fingers move; a mouse-wheel notch moves one step (Shift: ×10). `onValueCommit` fires once when the gesture stops, not on every event.
 - **Keys**: arrows step (Shift: ×10), Home and End, Delete resets. Double-click resets. Escape cancels a drag.
 
-The other controls:
+The slider's ruler has one form per part: ticks at round values of the range (1, 2, 2.5 or 5 × 10ⁿ, taller every 5), a fill from the origin to the value, a small triangle marking the origin when it isn't the minimum (zero on a bipolar range, or whatever you pass as `origin`), and the thumb, the only mark with a foot.
+
+### Other controls
 
 - **Stepper**: the cell itself is the spinbutton and takes the same keys as a slider. Press and hold − or + to repeat: one step at once, then after 400 ms a step every 60 ms. The − and + buttons never take focus, so reaching a limit never drops it.
 - **Key, hold mode**: Space and Enter can be held as well as the pointer. With `undoMs`, a confirmed key becomes `Undo · 3s` and counts down; pressing it calls `onUndo`.
 - **Toggle pair**: arrow keys move between the two words and select, like any radio group. The `ref` is the group's `<div>`; for a plain switch it is the `<button>`.
+
+### Motion
 
 Motion follows three rules: it runs only along the control's own axis, it never bounces, and every duration is a token (`--mo-t-press` 70 ms, `--mo-t-tick` 110 ms, `--mo-t-travel` 240 ms, `--mo-t-reflow` 400 ms). Reduced motion turns it all off.
 
@@ -138,8 +161,6 @@ Motion follows three rules: it runs only along the control's own axis, it never 
 - **Rolling digits**: on a discrete change (key, click, reset, wheel notch, Stepper button), only the digits that changed roll, up when the value grew. Values you drag, or that your code drives, change in place.
 - **Hover preview**: a hovering mouse shows a hollow ghost thumb where a click would land, and the label previews the value (`→ 64 %`).
 - **Hold to confirm**: let go early and the fill drains back; complete the hold and the full fill flashes once before Undo appears.
-
-The slider's ruler has one form per part: ticks at round values of the range (1, 2, 2.5 or 5 × 10ⁿ, taller every 5), a fill from the origin to the value, a small triangle marking the origin when it isn't the minimum (zero on a bipolar range, or whatever you pass as `origin`), and the thumb, the only mark with a foot.
 
 ## Accessibility
 
@@ -155,17 +176,25 @@ The slider's ruler has one form per part: ticks at round values of the range (1,
 
 ```bash
 npm install
-npm run dev     # demo board at localhost:5173
-npm test        # behaviour tests
-npm run lint    # oxlint, with the React hooks rules
-npm run build   # dist/ : ESM, CJS, types, styles.css
+npm run dev          # demo board at localhost:5173
+npm test             # behaviour tests
+npm run typecheck
+npm run lint         # oxlint, with the React hooks rules
+npm run build        # dist/ : ESM, CJS, types, styles.css
+npm run build:demo   # demo/dist/ : the static demo site
 ```
 
 `src/styles.css` is the published Molette CSS (tokens + components). The React code adds no styles; change the look there.
 
-To release, bump the version and push the tag. CI runs again, then the release workflow publishes to npm and creates the GitHub release:
+Every push runs CI (typecheck, lint, build, and tests on React 18 and 19). Every push to `main` redeploys the [demo](https://wlaith.github.io/molette/).
+
+### Release
+
+Releases are published from `main` by the release workflow. On `main`, bump the version and push the tag:
 
 ```bash
 npm version patch   # or minor / major: commits and tags vX.Y.Z
 git push --follow-tags
 ```
+
+CI runs again, then the workflow checks the tag is on `main` and matches `package.json`, publishes to npm with provenance and creates the GitHub release. It publishes through npm trusted publishing, so the package must be linked to this repo's `release.yml` workflow (environment `npm`) in its settings on npmjs.com. That link can only be made once the package exists, so the very first version is published by hand with `npm publish`.
