@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
+    branches: ['**']
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -36,7 +38,6 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # The lockfile pins React 19. Swap in the matrix version so both majors in peerDependencies are tested.
       - if: matrix.react != 19
         run: npm install --no-save react@${{ matrix.react }} react-dom@${{ matrix.react }}
       - run: npm test
