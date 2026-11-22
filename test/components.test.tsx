@@ -261,6 +261,22 @@ test('slider: on touch, a swipe across the slider is left to the page, a swipe a
   expect(s.getAttribute('aria-valuenow')).toBe('46');
 });
 
+test('slider: on touch, taking the capture over from the child the finger landed on keeps the drag alive', () => {
+  clock();
+  render(<Slider label="Vol" inertia={false} defaultValue={50} />);
+  const s = screen.getByRole('slider');
+  rig(s);
+  const tick = s.querySelector('.mo-ruler i') as HTMLElement; // implicitly captured by the browser
+  fireEvent.pointerDown(tick, { button: 0, pointerId: 1, pointerType: 'touch', clientX: 100, clientY: 70 });
+  fireEvent.pointerMove(tick, { pointerId: 1, pointerType: 'touch', clientX: 120, clientY: 70 });
+  fireEvent.lostPointerCapture(tick, { pointerId: 1, pointerType: 'touch' }); // capture moved to the slider; bubbles up
+  fireEvent.pointerMove(s, { pointerId: 1, pointerType: 'touch', clientX: 140, clientY: 70 });
+  expect(s.getAttribute('aria-valuenow')).toBe('42');
+  fireEvent.lostPointerCapture(s, { pointerId: 1, pointerType: 'touch' }); // the slider's own loss still ends it
+  fireEvent.pointerMove(s, { pointerId: 1, pointerType: 'touch', clientX: 160, clientY: 70 });
+  expect(s.getAttribute('aria-valuenow')).toBe('42');
+});
+
 test('slider wheel: trackpad travel follows the fingers, a mouse notch is one step, a gesture commits once', () => {
   vi.useFakeTimers();
   const tick = clock();
